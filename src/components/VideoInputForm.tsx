@@ -1,3 +1,4 @@
+import { api } from '@/lib/axios'
 import { getFFmpeg } from '@/lib/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 import { FileVideo, Upload } from 'lucide-react'
@@ -71,7 +72,19 @@ export function VideoInputForm() {
 
     const audioFile = await convertVideoToAudio(videoFile)
 
-    console.log(audioFile, prompt)
+    const data = new FormData()
+
+    data.append('file', audioFile)
+
+    const response = await api.post('/videos', data)
+
+    const videoId = response.data.video.id
+
+    await api.post(`/videos/${videoId}/transcription`, {
+      prompt,
+    })
+
+    console.log('Finalizou')
   }
 
   const previewURL = useMemo(() => {
