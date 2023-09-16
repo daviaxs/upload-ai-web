@@ -10,6 +10,13 @@ import { Textarea } from './ui/textarea'
 
 type Status = 'waiting' | 'converting' | 'uploading' | 'generating' | 'success'
 
+const statusMessage = {
+  converting: 'Convertendo...',
+  generating: 'Transcrevendo...',
+  uploading: 'Carregando...',
+  success: 'Sucesso!',
+}
+
 export function VideoInputForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const promptInputRef = useRef<HTMLTextAreaElement>(null)
@@ -146,11 +153,19 @@ export function VideoInputForm() {
       </div>
 
       <Button
+        data-success={status === 'success'}
         disabled={status !== 'waiting'}
         type="submit"
-        className="w-full p-6 flex items-center text-white gap-4"
+        className="w-full p-6 flex items-center text-white gap-4 data-[success=true]:bg-emerald-500"
       >
-        Carregar vídeo <Upload className="h-4 w-4" />
+        {status === 'waiting' ? (
+          <>
+            Carregar vídeo
+            <Upload className="h-4 w-4" />
+          </>
+        ) : (
+          statusMessage[status]
+        )}
       </Button>
     </form>
   )
