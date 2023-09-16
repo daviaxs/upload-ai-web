@@ -8,9 +8,12 @@ import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { Textarea } from './ui/textarea'
 
+type Status = 'waiting' | 'converting' | 'uploading' | 'generating' | 'success'
+
 export function VideoInputForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const promptInputRef = useRef<HTMLTextAreaElement>(null)
+  const [status, setStatus] = useState<Status>('waiting')
 
   function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
     const { files } = event.currentTarget
@@ -70,21 +73,27 @@ export function VideoInputForm() {
       return
     }
 
+    setStatus('converting')
+
     const audioFile = await convertVideoToAudio(videoFile)
 
     const data = new FormData()
 
     data.append('file', audioFile)
 
+    setStatus('uploading')
+
     const response = await api.post('/videos', data)
 
     const videoId = response.data.video.id
+
+    setStatus('generating')
 
     await api.post(`/videos/${videoId}/transcription`, {
       prompt,
     })
 
-    console.log('Finalizou')
+    setStatus('success')
   }
 
   const previewURL = useMemo(() => {
@@ -129,6 +138,7 @@ export function VideoInputForm() {
         <Label htmlFor="transcription_prompt">Prompt de transcrição</Label>
         <Textarea
           ref={promptInputRef}
+          disabled={status !== 'waiting'}
           id="transcription_prompt"
           className="h-20 leading-relaxed resize-none"
           placeholder="Inclua palavras-chaves mencionadas no vídeo separadas por (,)"
@@ -136,6 +146,7 @@ export function VideoInputForm() {
       </div>
 
       <Button
+        disabled={status !== 'waiting'}
         type="submit"
         className="w-full p-6 flex items-center text-white gap-4"
       >
