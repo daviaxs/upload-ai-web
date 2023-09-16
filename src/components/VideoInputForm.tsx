@@ -1,20 +1,51 @@
 import { FileVideo, Upload } from 'lucide-react'
+import { ChangeEvent, useMemo, useState } from 'react'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { Textarea } from './ui/textarea'
 
 export function VideoInputForm() {
-  function handleFileSelected() {}
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+
+  function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
+    const { files } = event.currentTarget
+
+    if (!files) {
+      return
+    }
+
+    const selectedFile = files[0]
+
+    setVideoFile(selectedFile)
+  }
+
+  const previewURL = useMemo(() => {
+    if (!videoFile) {
+      return null
+    }
+
+    return URL.createObjectURL(videoFile)
+  }, [videoFile])
 
   return (
     <form className="space-y-6 rounded-md">
       <label
         htmlFor="video"
-        className="border flex aspect-video cursor-pointer border-dashed rounded-lg text-sm flex-col gap-2 items-center justify-center text-muted-foreground hover:bg-slate-900/50 transition-colors"
+        className="relative border flex aspect-video cursor-pointer border-dashed rounded-lg text-sm flex-col gap-2 items-center justify-center text-muted-foreground hover:bg-slate-900/50 transition-colors"
       >
-        <FileVideo className="h-8 w-8" />
-        Selecione um vídeo
+        {previewURL ? (
+          <video
+            src={previewURL}
+            controls={false}
+            className="pointer-events-none absolute inset-0 rounded-lg"
+          />
+        ) : (
+          <>
+            <FileVideo className="h-8 w-8" />
+            Selecione um vídeo
+          </>
+        )}
       </label>
 
       <input
