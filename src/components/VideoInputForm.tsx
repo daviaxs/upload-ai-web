@@ -1,3 +1,5 @@
+import { getFFmpeg } from '@/lib/ffmpeg'
+import { fetchFile } from '@ffmpeg/util'
 import { FileVideo, Upload } from 'lucide-react'
 import { ChangeEvent, FormEvent, useMemo, useRef, useState } from 'react'
 import { Button } from './ui/button'
@@ -21,7 +23,43 @@ export function VideoInputForm() {
     setVideoFile(selectedFile)
   }
 
-  function handleUploadVideo(event: FormEvent<HTMLFormElement>) {
+  async function convertVideoToAudio(video: File) {
+    const ffmpeg = await getFFmpeg()
+
+    await ffmpeg.writeFile('input.mp4', await fetchFile(video))
+
+    // ffmpeg.on('log', (log) => {
+    //   console.log(log)
+    // })
+
+    ffmpeg.on('progress', (progress) => {
+      console.log('Convert progress:' + Math.round(progress.progress * 100))
+    })
+
+    await ffmpeg.exec([
+      '-i',
+      'input.mp4',
+      '-map',
+      '0:a',
+      '-b:a',
+      '20k',
+      'libmp3lame',
+      'output.mp3',
+    ])
+
+    const data = await ffmpeg.readFile('output.mp3')
+
+    const audioFileBlob = new Blob([data], { type: 'audio/mpeg' })
+    const audioFile = new File([audioFileBlob], 'audio.mp3', {
+      type: 'audio/mpeg',
+    })
+
+    console.log('Convert finished.')
+
+    return audioFile
+  }
+
+  async function handleUploadVideo(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const prompt = promptInputRef.current?.value
@@ -29,6 +67,10 @@ export function VideoInputForm() {
     if (!videoFile) {
       return
     }
+
+    const audioFile = await convertVideoToAudio(videoFile)
+
+    console.log(audioFile)
   }
 
   const previewURL = useMemo(() => {
