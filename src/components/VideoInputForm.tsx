@@ -43,6 +43,7 @@ export function VideoInputForm() {
       '0:a',
       '-b:a',
       '20k',
+      '-acodec',
       'libmp3lame',
       'output.mp3',
     ])
@@ -70,7 +71,7 @@ export function VideoInputForm() {
 
     const audioFile = await convertVideoToAudio(videoFile)
 
-    console.log(audioFile)
+    console.log(audioFile, prompt)
   }
 
   const previewURL = useMemo(() => {
