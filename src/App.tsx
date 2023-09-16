@@ -1,4 +1,5 @@
 import { Github, Wand2 } from 'lucide-react'
+import { useState } from 'react'
 import { PromptSelect } from './components/PromptSelect'
 import { VideoInputForm } from './components/VideoInputForm'
 import { Button } from './components/ui/button'
@@ -15,6 +16,9 @@ import { Slider } from './components/ui/slider'
 import { Textarea } from './components/ui/textarea'
 
 export function App() {
+  const [temperature, setTemperature] = useState(0.5)
+  const [videoId, setVideoId] = useState<string | null>(null)
+
   function handlePromptSelected(template: string) {
     console.log(template)
   }
@@ -60,7 +64,7 @@ export function App() {
         </div>
 
         <aside className="w-80 space-y-6">
-          <VideoInputForm />
+          <VideoInputForm onVideoUploaded={setVideoId} />
 
           <Separator />
 
@@ -95,7 +99,13 @@ export function App() {
             <div className="space-y-4">
               <Label>Temperatura</Label>
 
-              <Slider min={0} max={1} step={0.1} />
+              <Slider
+                min={0}
+                max={1}
+                step={0.1}
+                value={[temperature]}
+                onValueChange={(value) => setTemperature(value[0])}
+              />
 
               <span className="block text-sm italic text-muted-foreground leading-relaxed">
                 Valores mais altos tendem a deixar o resultado mais criativo e

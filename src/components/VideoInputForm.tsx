@@ -10,6 +10,10 @@ import { Textarea } from './ui/textarea'
 
 type Status = 'waiting' | 'converting' | 'uploading' | 'generating' | 'success'
 
+interface VideoInputFormProps {
+  onVideoUploaded: (id: string) => void
+}
+
 const statusMessage = {
   converting: 'Convertendo...',
   generating: 'Transcrevendo...',
@@ -17,7 +21,7 @@ const statusMessage = {
   success: 'Sucesso!',
 }
 
-export function VideoInputForm() {
+export function VideoInputForm(props: VideoInputFormProps) {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const promptInputRef = useRef<HTMLTextAreaElement>(null)
   const [status, setStatus] = useState<Status>('waiting')
@@ -101,6 +105,8 @@ export function VideoInputForm() {
     })
 
     setStatus('success')
+
+    props.onVideoUploaded(videoId)
   }
 
   const previewURL = useMemo(() => {
